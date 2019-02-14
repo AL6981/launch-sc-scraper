@@ -1,16 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import CohortStatistics from './CohortStatistics'
-import GroceryList from './GroceryList'
-import ReactQuiz from './ReactQuiz'
-import ReactSimpleBlog from './ReactSimpleBlog'
-import ProjectPlannerOnline from './ProjectPlannerOnline'
-import RestaurantReviewsBoston from './RestaurantReviewsBoston'
+import queries from './constants';
 import * as serviceWorker from './serviceWorker';
 import ApolloClient from "apollo-boost";
-
 import { ApolloProvider } from "react-apollo";
+import {Query} from "react-apollo";
+import gql from "graphql-tag";
+import RepoTile from './RepoTile'
 
 
 const client = new ApolloClient({
@@ -28,27 +25,41 @@ const client = new ApolloClient({
   }
 })
 
-const Index = () => ( 
+const Index = (props) => { 
+  const queryComponents = queries.map((query) => {
+    return (
+      <Query query = {query}>
+        {({ loading, error, data }) => {
+          if (loading) {
+            return (<p> I'm givin' it all I've got!!<span role="img" aria-label="hour glass">⏳</span>... </p>);
+          }
+          if (error) {
+            return (<p> Error: </p>);
+          }
+
+        return data.search.edges.map((repo) => (
+          <RepoTile
+            key={repo.id}
+            repoName={repo.node.name}
+            repoOwner={repo.node.owner.login}
+            repoUrl={repo.node.url}
+            repoDate={repo.node.createdAt}
+          />
+        ));
+        }}
+        </Query>)
+        })
+  return (
   <ApolloProvider client = {client} >
     <div>
       <h2> Github System Check Scraper <span role = "img" aria-label="rocket"> 🚀 </span> </h2>
-      <div className="list">
-        <h4>Week 1 Cohort Statistics</h4>
-        <CohortStatistics />
-        <h4>Week 2 Grocery List Sinatra</h4>
-        <GroceryList />
-        <h4>Week 3 React Quiz</h4>
-        <ReactQuiz />
-        <h4>Week 4 React Simple Blog</h4>
-        <ReactSimpleBlog />
-        <h4>Week 5 Project Planner Online</h4>
-        <ProjectPlannerOnline />
-        <h4>Week 6 Restaurant Reviews Boston</h4>
-        <RestaurantReviewsBoston />
+      <div id="list">
+        {queryComponents}
       </div>
     </div> 
   </ApolloProvider>
-)
+  )
+}
 
 ReactDOM.render(<Index />, document.getElementById('root'));
 

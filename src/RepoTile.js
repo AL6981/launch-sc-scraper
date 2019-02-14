@@ -8,6 +8,7 @@ const RepoTile = (props) => {
       Created On: {props.repoDate}
       <br></br>
       <br></br>
+      <hr/>
     </div>
   )
 }
